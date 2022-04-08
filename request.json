@@ -1,0 +1,26 @@
+{
+    "_links": {
+      "self": {
+        "href": "https://myurl"
+      }
+    },
+    "arena": {
+      "dims": [5,5],
+      "state": {
+        "https://myurl": {
+          "x": 3,
+          "y": 0,
+          "direction": "E",
+          "wasHit": false,
+          "score": 0
+        },
+        "https://opponent1": {
+            "x": 4,
+            "y": 1,
+            "direction": "E",
+            "wasHit": false,
+            "score": 0
+        }
+      }
+    }
+  }

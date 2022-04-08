@@ -46,6 +46,7 @@ func play(input ArenaUpdate) (response string) {
 	board := generateBoard(input)
 	myState := extractMyState(input)
 	if someoneIsInFrontOfMe(myState, board) {
+		log.Println("throwing because someone is in front of me")
 		return "T"
 	} else {
 		return moveTowardsNextClosestPlayer(myState, board)
@@ -74,6 +75,7 @@ func generateBoard(input ArenaUpdate) [][]bool {
 		vY := v.Y
 		board[vX][vY] = true
 	}
+	log.Printf("board is: %v", board)
 	return board
 }
 
@@ -84,37 +86,39 @@ func moveTowardsNextClosestPlayer(myState PlayerState, board [][]bool) (response
 }
 
 // determines if there is a player in firing line or not
-func someoneIsInFrontOfMe(myState PlayerState, board [][]bool) (response bool) {
+func someoneIsInFrontOfMe(myState PlayerState, board [][]bool) (result bool) {
 	myX := myState.X
 	myY := myState.Y
 	myDirection := myState.Direction
 	boardWidth := len(board)
 	boardHeight := len(board[0])
+	maxThrowLength := 3
 	switch myDirection {
 	case "N":
-		if myY-1 >= 0 { // check we dont go outside north border
-			return board[myX][myY-1]
-		} else {
-			return false
+		for i := 1; i <= maxThrowLength; i++ {
+			if myY-i >= 0 && board[myX][myY-i] { // check we dont go outside north border
+				return true
+			}
 		}
 	case "E":
-		if myX+1 <= boardWidth { // check we dont go outside the east border
-			return board[myX+1][myY]
-		} else {
-			return false
+		for i := 1; i <= maxThrowLength; i++ {
+			if myX+i < boardWidth && board[myX+i][myY] { // check we dont go outside the east border
+				return true
+			}
 		}
 	case "S":
-		if myY+1 <= boardHeight { // check we dont go outside the south border
-			return board[myX][myY+1]
-		} else {
-			return false
+		for i := 1; i <= maxThrowLength; i++ {
+			if myY+i <= boardHeight && board[myX][myY+i] { // check we dont go outside the south border
+				return true
+			}
 		}
 	default: // "W"
-		if myX-1 >= 0 { // check we dont go outside west border
-			return board[myX-1][myY]
-		} else {
-			return false
+		for i := 1; i <= maxThrowLength; i++ {
+			if myX-i >= 0 && board[myX-i][myY] { // check we dont go outside west border
+				return true
+			}
 		}
 	}
+	return false
 
 }
