@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	rand2 "math/rand"
 	"net/http"
 	"os"
@@ -80,9 +81,40 @@ func generateBoard(input ArenaUpdate) [][]bool {
 }
 
 func moveTowardsNextClosestPlayer(myState PlayerState, board [][]bool) (response string) {
-	commands := []string{"F", "R", "L", "T"}
-	rand := rand2.Intn(4)
+	opponentCoords := determineNextClosestPlayer(myState, board)
+	return determineNextMove(myState, opponentCoords)
+}
+
+func determineNextMove(myState PlayerState, opponentCoords []int) string {
+	commands := []string{"F", "R", "L"}
+	rand := rand2.Intn(3)
 	return commands[rand]
+}
+
+func determineNextClosestPlayer(myState PlayerState, board [][]bool) []int {
+	closestCoords := []int{0, 0}
+	closestDistance := -1.0
+	for x := range board {
+		for y := range board[x] {
+			if x == myState.X && y == myState.Y { // skip ourselves
+				continue
+			}
+			if board[x][y] { // if there's a player at this location
+				currentDistance := calculateDistance(myState, x, y)
+				if closestDistance == -1 || currentDistance < closestDistance {
+					closestDistance = currentDistance
+					closestCoords = []int{x, y}
+				}
+			}
+		}
+	}
+	return closestCoords
+}
+
+func calculateDistance(myState PlayerState, x2 int, y2 int) float64 {
+	x1 := myState.X
+	y1 := myState.Y
+	return math.Sqrt(math.Pow(float64(x2-x1), 2) + math.Pow(float64(y2-y1), 2))
 }
 
 // determines if there is a player in firing line or not
