@@ -43,8 +43,19 @@ func handler(w http.ResponseWriter, req *http.Request) {
 
 func play(input ArenaUpdate) (response string) {
 	log.Printf("IN: %#v", input)
+	if someoneIsInFrontOfMe(input) {
+		return "T"
+	} else {
+		return moveTowardsNextClosestPlayer(input)
+	}
+}
 
+func moveTowardsNextClosestPlayer(input ArenaUpdate) (response string) {
 	commands := []string{"F", "R", "L", "T"}
 	rand := rand2.Intn(4)
 	return commands[rand]
+}
+
+func someoneIsInFrontOfMe(input ArenaUpdate) (response bool) {
+	return false
 }
