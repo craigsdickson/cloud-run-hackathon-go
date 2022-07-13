@@ -37,7 +37,8 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	jsonReq, _ := json.Marshal(v)
+	log.Printf("received ArenaUpdate: %s", jsonReq)
 	resp := play(v)
 	fmt.Fprint(w, resp)
 }
@@ -117,10 +118,10 @@ func calculateDistance(myState PlayerState, x2 int, y2 int) float64 {
 	return math.Sqrt(math.Pow(float64(x2-x1), 2) + math.Pow(float64(y2-y1), 2))
 }
 
-// determines if there is a player in firing line or not
+// determines if there is a player in our firing line or not
 func someoneIsInFrontOfMe(myState PlayerState, board [][]bool) (result bool) {
-	myX := myState.X
-	myY := myState.Y
+	myXcoord := myState.X
+	myYcoord := myState.Y
 	myDirection := myState.Direction
 	boardWidth := len(board)
 	boardHeight := len(board[0])
@@ -128,25 +129,25 @@ func someoneIsInFrontOfMe(myState PlayerState, board [][]bool) (result bool) {
 	switch myDirection {
 	case "N":
 		for i := 1; i <= maxThrowLength; i++ {
-			if myY-i >= 0 && board[myX][myY-i] { // check we dont go outside north border
+			if myYcoord-i >= 0 && board[myXcoord][myYcoord-i] { // check we dont go outside north border
 				return true
 			}
 		}
 	case "E":
 		for i := 1; i <= maxThrowLength; i++ {
-			if myX+i < boardWidth && board[myX+i][myY] { // check we dont go outside the east border
+			if myXcoord+i < boardWidth && board[myXcoord+i][myYcoord] { // check we dont go outside the east border
 				return true
 			}
 		}
 	case "S":
 		for i := 1; i <= maxThrowLength; i++ {
-			if myY+i <= boardHeight && board[myX][myY+i] { // check we dont go outside the south border
+			if myYcoord+i < boardHeight && board[myXcoord][myYcoord+i] { // check we dont go outside the south border
 				return true
 			}
 		}
 	default: // "W"
 		for i := 1; i <= maxThrowLength; i++ {
-			if myX-i >= 0 && board[myX-i][myY] { // check we dont go outside west border
+			if myXcoord-i >= 0 && board[myXcoord-i][myYcoord] { // check we dont go outside west border
 				return true
 			}
 		}

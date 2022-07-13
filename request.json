@@ -1,26 +1,29 @@
 {
     "_links": {
-      "self": {
-        "href": "https://myurl"
-      }
+        "self": {
+            "href": "https://cloudbowl-samples-go-pbm42mxwga-uc.a.run.app"
+        }
     },
     "arena": {
-      "dims": [5,5],
-      "state": {
-        "https://myurl": {
-          "x": 3,
-          "y": 0,
-          "direction": "E",
-          "wasHit": false,
-          "score": 0
-        },
-        "https://opponent1": {
-            "x": 4,
-            "y": 1,
-            "direction": "E",
-            "wasHit": false,
-            "score": 0
+        "dims": [
+            4,
+            3
+        ],
+        "state": {
+            "https://cloudbowl-samples-go-pbm42mxwga-uc.a.run.app": {
+                "x": 2,
+                "y": 2,
+                "direction": "W",
+                "wasHit": false,
+                "score": 2998
+            },
+            "https://cloudbowl-samples-python-2xltjb3vtq-uc.a.run.app": {
+                "x": 0,
+                "y": 2,
+                "direction": "E",
+                "wasHit": true,
+                "score": -2998
+            }
         }
-      }
     }
-  }
+}
