@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
-	rand2 "math/rand"
+	// rand2 "math/rand"
 	"net/http"
 	"os"
 )
@@ -87,9 +87,170 @@ func moveTowardsNextClosestPlayer(myState PlayerState, board [][]bool) (response
 }
 
 func determineNextMove(myState PlayerState, opponentCoords []int) string {
-	commands := []string{"F", "R", "L"}
-	rand := rand2.Intn(3)
-	return commands[rand]
+	directionImFacing := myState.Direction
+	directionOfOpponent := determineDirectionOfOpponent(myState, opponentCoords)
+	switch directionImFacing {
+	case "N":
+		switch directionOfOpponent {
+		case "N":
+			fallthrough
+		case "NE":
+			fallthrough
+		case "NW":
+			return "F"
+		case "E":
+			fallthrough
+		case "SE":
+			fallthrough
+		case "S":
+			return "R"
+		case "SW":
+			fallthrough
+		default: // "W":
+			return "L"
+		}
+	case "E":
+		switch directionOfOpponent {
+		case "N":
+			fallthrough
+		case "NW":
+			return "L"
+		case "NE":
+			fallthrough
+		case "E":
+			fallthrough
+		case "SE":
+			return "F"
+		case "S":
+			fallthrough
+		case "SW":
+			fallthrough
+		default: // "W":
+			return "R"
+		}
+	case "S":
+		switch directionOfOpponent {
+		case "N":
+			fallthrough
+		case "W":
+			fallthrough
+		case "NW":
+			return "R"
+		case "NE":
+			fallthrough
+		case "E":
+			return "L"
+		case "SE":
+			fallthrough
+		case "S":
+			fallthrough
+		default: // "SW":
+			return "F"
+		}
+	default: //W
+		switch directionOfOpponent {
+		case "N":
+			fallthrough
+		case "NE":
+			fallthrough
+		case "E":
+			return "R"
+		case "SE":
+			fallthrough
+		case "S":
+			return "L"
+		case "SW":
+			fallthrough
+		case "W":
+			fallthrough
+		default: // "NW":
+			return "F"
+		}
+	}
+
+	// switch directionOfOpponent {
+	// case "N":
+	// 	switch directionImFacing {
+	// 	case "N":
+	// 		return "F"
+	// 	case "E":
+	// 		return "R"
+	// 	case "S":
+	// 		return "R"
+	// 	default: //W
+	// 		return "L"
+	// 	}
+	// case "E":
+	// 	switch directionImFacing {
+	// 	case "N":
+	// 		return "R"
+	// 	case "E":
+	// 		return "F"
+	// 	case "S":
+	// 		return "R"
+	// 	default: //W
+	// 		return "L"
+	// 	}
+	// case "S":
+	// 	switch directionImFacing {
+	// 	case "N":
+	// 		return "R"
+	// 	case "E":
+	// 		return "R"
+	// 	case "S":
+	// 		return "F"
+	// 	default: //W
+	// 		return "L"
+	// 	}
+	// default: //W
+	// 	switch directionImFacing {
+	// 	case "N":
+	// 		return "L"
+	// 	case "E":
+	// 		return "R"
+	// 	case "S":
+	// 		return "R"
+	// 	default: //W
+	// 		return "F"
+	// 	}
+	// }
+	// commands := []string{"F", "R", "L"}
+	// rand := rand2.Intn(3)
+	// return commands[rand]
+}
+
+func determineDirectionOfOpponent(myState PlayerState, opponentCoords []int) string {
+	myXcoord := myState.X
+	myYcoord := myState.Y
+	result := ""
+	opponentXcoord := opponentCoords[0]
+	opponentYcoord := opponentCoords[1]
+	if myXcoord == opponentXcoord {
+		if myYcoord > opponentYcoord {
+			result = "N"
+		} else {
+			result = "S"
+		}
+	} else if myYcoord == opponentYcoord {
+		if myXcoord > opponentXcoord {
+			result = "W"
+		} else {
+			result = "E"
+		}
+	} else if myYcoord > opponentYcoord {
+		if myXcoord > opponentXcoord {
+			result = "NW"
+		} else {
+			result = "NE"
+		}
+	} else { // myYcoord < opponentYcoord
+		if myXcoord > opponentXcoord {
+			result = "SW"
+		} else {
+			result = "SE"
+		}
+	}
+	return result
 }
 
 func determineNextClosestPlayer(myState PlayerState, board [][]bool) []int {
