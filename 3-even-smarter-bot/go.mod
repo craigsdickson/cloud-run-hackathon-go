@@ -1,3 +1,3 @@
-module even-better-bot
+module even-smarter-bot
 
-go 1.18
+go 1.17

@@ -1,5 +1,9 @@
 package main
 
+import (
+	"even-smarter-bot/playerstate"
+)
+
 type ArenaUpdate struct {
 	Links struct {
 		Self struct {
@@ -7,25 +11,9 @@ type ArenaUpdate struct {
 		} `json:"self"`
 	} `json:"_links"`
 	Arena struct {
-		Dimensions []int                  `json:"dims"`
-		State      map[string]PlayerState `json:"state"`
+		Dimensions []int                              `json:"dims"`
+		State      map[string]playerstate.PlayerState `json:"state"`
 	} `json:"arena"`
-}
-
-type PlayerState struct {
-	X         int    `json:"x"`
-	Y         int    `json:"y"`
-	Direction string `json:"direction"`
-	WasHit    bool   `json:"wasHit"`
-	Score     int    `json:"score"`
-}
-
-type Board struct {
-	squares [][]PlayerState
-}
-
-func New() Board {
-
 }
 
 type Coordinates struct {
