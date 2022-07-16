@@ -33,9 +33,9 @@ resource "google_project_iam_member" "cloud_build_sa_sauser" {
 resource "google_cloudbuild_trigger" "main" {
   name        = "deploy-to-cloudrun"
   description = "Builds bot container and deploys to cloudrun"
-  filename    = "3-even-smarter-tool/go/cloudbuild.yaml"
+  filename    = "3-even-smarter-bot/go/cloudbuild.yaml"
   included_files = [
-    "3-even-smarter-tool/go/**"
+    "3-even-smarter-bot/go/**"
   ]
   github {
     name  = "cloud-run-hackathon-go"
