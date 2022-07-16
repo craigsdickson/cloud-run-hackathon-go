@@ -1,9 +1,5 @@
 #!/bin/sh
 
-export PROJECT_ID=cloudbowl-356114
+# the user account running this gcloud command needs the roles/viewer or roles/owner role on the project to be able to stream the cloud build logs to the console
 
-pack build --builder=gcr.io/buildpacks/builder us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot
-
-docker push us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot
-
-gcloud run deploy --image=us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot --platform=managed --project=$PROJECT_ID --region=us-central1 --allow-unauthenticated --memory=256Mi even-smarter-bot
+gcloud builds submit --project microbot-hackathon --config ./3-even-smarter-bot/go/cloudbuild.yaml --substitutions=COMMIT_SHA=latest ./3-even-smarter-bot/go
