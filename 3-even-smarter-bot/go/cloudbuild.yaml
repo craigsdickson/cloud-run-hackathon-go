@@ -1,7 +1,7 @@
 steps:
 - name: 'gcr.io/k8s-skaffold/pack'
   entrypoint: 'pack'
-  args: ['build', '--builder=gcr.io/buildpacks/builder:v1', '--path', './3-even-smarter-bot', '--publish', 'us-docker.pkg.dev/$PROJECT_ID/even-smarter-bot:$COMMIT_SHA']
+  args: ['build', '--builder=gcr.io/buildpacks/builder:v1', '--path', '.', '--publish', 'us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot:$COMMIT_SHA']
 
 - name: 'gcr.io/cloud-builders/gcloud'
-  args: ['run', 'deploy', '--image=us-docker.pkg.dev/$PROJECT_ID/even-smarter-bot:$COMMIT_SHA', '--platform=managed', '--project=$PROJECT_ID', '--region=us-central1', '--allow-unauthenticated', '--memory=256Mi', 'even-smarter-bot']
+  args: ['run', 'deploy', '--image=us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot:$COMMIT_SHA', '--platform=managed', '--project=$PROJECT_ID', '--region=us-central1', '--allow-unauthenticated', '--memory=256Mi', 'even-smarter-bot']

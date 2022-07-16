@@ -102,27 +102,42 @@ func (board Board) FindClosestOpponent(myState playerstate.PlayerState) playerst
 	return closestOpponent
 }
 
+/**
+ * The percentile controls what makes a player a "high scorer" - a value of 0.1 means only the top 10% of scoring players count,
+ * a value of 0.5 means the top 50% of players count etc.
+ */
 func (board Board) FindClosestHighScoringOpponent(myState playerstate.PlayerState, percentile float64) playerstate.PlayerState {
 	closestHighScoringOpponent := playerstate.PlayerState{}
-	closestDistance := -1.0
-	for opponent := range board.Leaderboard {
-
-	}
-
-	for x := range board.Squares {
-		for y := range board.Squares[x] {
-			if x == myState.X && y == myState.Y { // skip ourselves
-				continue
-			}
-			if board.IsSquareOccupied(x, y) {
-				currentDistance := calculateDistance(myState.X, myState.Y, x, y)
-				if closestDistance == -1 || currentDistance < closestDistance {
-					closestDistance = currentDistance
-					closestHighScoringOpponent = *board.Squares[x][y]
-				}
+	closestDistance := math.MaxFloat64 // technically this means this method could fail with an incredibly huge board
+	var maxIndex int = int(math.Round(float64(board.NumberOfPlayers) * percentile))
+	foundAnOpponent := false
+	for i := 0; i < maxIndex; i++ {
+		opponent := *board.Leaderboard[i]
+		if opponent != myState {
+			currentDistance := calculateDistance(myState.X, myState.Y, opponent.X, opponent.Y)
+			// we save the firstdss opponent, after that we only save the opponent if they are actually closer
+			if !foundAnOpponent || currentDistance < closestDistance {
+				closestDistance = currentDistance
+				closestHighScoringOpponent = opponent
+				foundAnOpponent = true
 			}
 		}
 	}
+
+	// for x := range board.Squares {
+	// 	for y := range board.Squares[x] {
+	// 		if x == myState.X && y == myState.Y { // skip ourselves
+	// 			continue
+	// 		}
+	// 		if board.IsSquareOccupied(x, y) {
+	// 			currentDistance := calculateDistance(myState.X, myState.Y, x, y)
+	// 			if closestDistance == -1 || currentDistance < closestDistance {
+	// 				closestDistance = currentDistance
+	// 				closestHighScoringOpponent = *board.Squares[x][y]
+	// 			}
+	// 		}
+	// 	}
+	// }
 	return closestHighScoringOpponent
 }
 

@@ -17,7 +17,7 @@ func main() {
 	}
 	http.HandleFunc("/", handler)
 
-	log.Printf("starting server on port :%s", port)
+	log.Printf("starting server on port :%v", port)
 	err := http.ListenAndServe(":"+port, nil)
 	log.Fatalf("http listen error: %v", err)
 }
@@ -45,11 +45,20 @@ func play(input ArenaUpdate) (response string) {
 	log.Printf("IN: %#v", input)
 	board := board.New(input.Arena.Dimensions[0], input.Arena.Dimensions[1], input.Arena.State)
 	myState := extractMyState(input)
-	if board.IsSomeoneInFrontOfMe(myState, 3) {
-		log.Println("throwing because someone is in front of me")
+	log.Printf("i am at x:%v y:%v and I am facing %v", myState.X, myState.Y, myState.Direction)
+	// if we are the only player, just spin on the spot
+	if board.NumberOfPlayers == 1 {
+		log.Printf("there are no other players on the board")
+		return "R"
+		// otherwise check if someone is in front of us and within the max throw distance
+	} else if board.IsSomeoneInFrontOfMe(myState, 3) {
+		log.Printf("I am throwing")
 		return "T"
+		// otherwise move towards an opponent we want to throw at
 	} else {
-		return moveTowardsClosestOpponent(myState, board)
+		log.Printf("there is no one to throw at")
+		//return moveTowardsClosestOpponent(myState, board)
+		return moveTowardsClosestHighScoringOpponent(myState, board)
 	}
 }
 
@@ -61,15 +70,17 @@ func extractMyState(input ArenaUpdate) playerstate.PlayerState {
 
 func moveTowardsClosestOpponent(myState playerstate.PlayerState, board board.Board) (response string) {
 	opponent := board.FindClosestOpponent(myState)
+	log.Printf("closest opponent is at x:%v y:%v", opponent.X, opponent.Y)
 	return determineNextMove(myState, opponent)
 }
 
 func moveTowardsClosestHighScoringOpponent(myState playerstate.PlayerState, board board.Board) (response string) {
 	opponent := board.FindClosestHighScoringOpponent(myState, 0.5)
+	log.Printf("closest high scoring opponent is at x:%v y:%v with a score of %v", opponent.X, opponent.Y, opponent.Score)
 	return determineNextMove(myState, opponent)
 }
 
-func determineNextMove(myState playerstate.PlayerState, opponentState playerstate.PlayerState) string {
+func determineNextMove(myState playerstate.PlayerState, opponentState playerstate.PlayerState) (result string) {
 	directionImFacing := myState.Direction
 	directionOfOpponent := determineDirectionOfOpponent(myState, opponentState)
 	switch directionImFacing {
@@ -80,36 +91,36 @@ func determineNextMove(myState playerstate.PlayerState, opponentState playerstat
 		case "NE":
 			fallthrough
 		case "NW":
-			return "F"
+			result = "F"
 		case "E":
 			fallthrough
 		case "SE":
 			fallthrough
 		case "S":
-			return "R"
+			result = "R"
 		case "SW":
 			fallthrough
 		default: // "W":
-			return "L"
+			result = "L"
 		}
 	case "E":
 		switch directionOfOpponent {
 		case "N":
 			fallthrough
 		case "NW":
-			return "L"
+			result = "L"
 		case "NE":
 			fallthrough
 		case "E":
 			fallthrough
 		case "SE":
-			return "F"
+			result = "F"
 		case "S":
 			fallthrough
 		case "SW":
 			fallthrough
 		default: // "W":
-			return "R"
+			result = "R"
 		}
 	case "S":
 		switch directionOfOpponent {
@@ -118,17 +129,17 @@ func determineNextMove(myState playerstate.PlayerState, opponentState playerstat
 		case "W":
 			fallthrough
 		case "NW":
-			return "R"
+			result = "R"
 		case "NE":
 			fallthrough
 		case "E":
-			return "L"
+			result = "L"
 		case "SE":
 			fallthrough
 		case "S":
 			fallthrough
 		default: // "SW":
-			return "F"
+			result = "F"
 		}
 	default: //W
 		switch directionOfOpponent {
@@ -137,25 +148,26 @@ func determineNextMove(myState playerstate.PlayerState, opponentState playerstat
 		case "NE":
 			fallthrough
 		case "E":
-			return "R"
+			result = "R"
 		case "SE":
 			fallthrough
 		case "S":
-			return "L"
+			result = "L"
 		case "SW":
 			fallthrough
 		case "W":
 			fallthrough
 		default: // "NW":
-			return "F"
+			result = "F"
 		}
 	}
+	log.Printf("direction of opponent is %v, therefore I am going to move %v", directionOfOpponent, result)
+	return result
 }
 
-func determineDirectionOfOpponent(myState playerstate.PlayerState, opponentState playerstate.PlayerState) string {
+func determineDirectionOfOpponent(myState playerstate.PlayerState, opponentState playerstate.PlayerState) (result string) {
 	myXcoord := myState.X
 	myYcoord := myState.Y
-	result := ""
 	opponentXcoord := opponentState.X
 	opponentYcoord := opponentState.Y
 	if myXcoord == opponentXcoord {
@@ -183,5 +195,6 @@ func determineDirectionOfOpponent(myState playerstate.PlayerState, opponentState
 			result = "SE"
 		}
 	}
+	log.Printf("i am at x:%v y:%v and opponent is at x:%v y:%v, so their direction from me is %v", myXcoord, myYcoord, opponentXcoord, opponentYcoord, result)
 	return result
 }
