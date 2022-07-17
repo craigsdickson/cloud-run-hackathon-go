@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"even-smarter-bot/board"
 	"even-smarter-bot/playerstate"
@@ -8,6 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"cloud.google.com/go/compute/metadata"
+	"cloud.google.com/go/pubsub"
 )
 
 func main() {
@@ -37,8 +41,35 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	go postArenaUpdateEvent(v) // call this asynchonously
 	resp := play(v)
 	fmt.Fprint(w, resp)
+}
+
+func postArenaUpdateEvent(input ArenaUpdate) {
+	ctx := context.Background()
+	metadataClient := metadata.NewClient(nil)
+	projectId, err := metadataClient.ProjectID()
+	if err != nil {
+		log.Fatalf("metadataClient.ProjectID: %v", err)
+	}
+	pubsubClient, err := pubsub.NewClient(ctx, projectId)
+	if err != nil {
+		log.Fatalf("pubsub.NewClient: %v", err)
+	}
+	defer pubsubClient.Close()
+	topic := pubsubClient.Topic(os.Getenv("ARENA_UPDATES_PUBSUB_TOPIC_NAME"))
+	message, err := json.Marshal(input)
+	if err != nil {
+		log.Fatalf("json.Marshal fatal error: %v", err)
+	}
+	publishResult := topic.Publish(ctx, &pubsub.Message{Data: message})
+	id, err := publishResult.Get(ctx)
+	if err != nil {
+		log.Fatalf("topic.Publish fatal error: %v", err)
+	}
+	log.Printf("published message with id: %v", id)
+	topic.Stop()
 }
 
 func play(input ArenaUpdate) (response string) {

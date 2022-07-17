@@ -1,7 +1,12 @@
 steps:
 - name: 'gcr.io/k8s-skaffold/pack'
   entrypoint: 'pack'
-  args: ['build', '--builder=gcr.io/buildpacks/builder:v1', '--path', './3-even-smarter-bot/go', '--publish', 'us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot:$COMMIT_SHA']
+  args: [
+    'build', 
+    '--builder=gcr.io/buildpacks/builder:v1', 
+    '--path', './3-even-smarter-bot/go', 
+    '--publish', 'us-docker.pkg.dev/$PROJECT_ID/bots-repo/even-smarter-bot:$COMMIT_SHA'
+  ]
 
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [
@@ -11,6 +16,7 @@ steps:
     '--platform=managed',
     '--project=$PROJECT_ID',
     '--service-account=cloudrun-bot@microbot-hackathon.iam.gserviceaccount.com',
+    '--set-env-vars=ARENA_UPDATES_PUBSUB_TOPIC_NAME=arena-updates',
     '--region=us-central1',
     '--allow-unauthenticated',
     '--memory=256Mi',

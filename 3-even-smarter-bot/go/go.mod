@@ -3,12 +3,16 @@ module even-smarter-bot
 go 1.17
 
 require (
+	cloud.google.com/go/compute v1.5.0
+	cloud.google.com/go/pubsub v1.3.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.13
 	go.opencensus.io v0.23.0
 )
 
 require (
-	cloud.google.com/go/compute v1.5.0 // indirect
+	cloud.google.com/go v0.100.2 // indirect
+	cloud.google.com/go/iam v0.3.0 // indirect
+	cloud.google.com/go/kms v1.4.0 // indirect
 	cloud.google.com/go/monitoring v1.1.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect

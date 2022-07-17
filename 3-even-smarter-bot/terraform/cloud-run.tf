@@ -5,8 +5,13 @@ resource "google_service_account" "cloudrun_service_sa" {
 }
 
 resource "google_project_iam_member" "cloud_run_sa" {
+  for_each = toset([
+    "roles/monitoring.editor",
+    "roles/pubsub.publisher"
+  ])
+
   project = google_project.main.project_id
-  role    = "roles/monitoring.editor"
+  role    = each.value
   member  = "serviceAccount:${google_service_account.cloudrun_service_sa.email}"
 
   #   depends_on = [
