@@ -1,10 +1,16 @@
 package board
 
 import (
+	"context"
 	"even-smarter-bot/playerstate"
 	"log"
 	"math"
 	"sort"
+
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/tag"
 )
 
 type Board struct {
@@ -13,6 +19,29 @@ type Board struct {
 	Height          int
 	NumberOfPlayers int
 	Leaderboard     []*playerstate.PlayerState
+}
+
+var (
+	score    = stats.Int64("score", "The current score of the bot", stats.UnitDimensionless)
+	botId, _ = tag.NewKey("botId")
+)
+
+func init() {
+	// Register the view. It is imperative that this step exists,
+	// otherwise recorded metrics will be dropped and never exported.
+	v := &view.View{
+		Name:        "score_history",
+		Measure:     score,
+		Description: "Bot scores ploted as a time series",
+		TagKeys:     []tag.Key{botId},
+
+		// Latency in buckets:
+		// [>=0ms, >=100ms, >=200ms, >=400ms, >=1s, >=2s, >=4s]
+		Aggregation: view.LastValue(), //Distribution(0, 100, 200, 400, 1000, 2000, 4000),
+	}
+	if err := view.Register(v); err != nil {
+		log.Fatalf("Failed to register the view: %v", err)
+	}
 }
 
 func New(width int, height int, players map[string]playerstate.PlayerState) Board {
@@ -25,13 +54,37 @@ func New(width int, height int, players map[string]playerstate.PlayerState) Boar
 	for i := range board.Squares {
 		board.Squares[i] = make([]*playerstate.PlayerState, height)
 	}
+	// set up metrics collection
+
+	// Enable OpenCensus exporters to export metrics
+	// to Stackdriver Monitoring.
+	// Exporters use Application Default Credentials to authenticate.
+	// See https://developers.google.com/identity/protocols/application-default-credentials
+	// for more details.
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Flush must be called before main() exits to ensure metrics are recorded.
+	defer exporter.Flush()
+
+	if err := exporter.StartMetricsExporter(); err != nil {
+		log.Fatalf("Error starting metric exporter: %v", err)
+	}
+	defer exporter.StopMetricsExporter()
+
 	// now populate squares and leaderboard with players
 	var playerIndex = 0
-	for _, v := range players {
+	for k, v := range players {
 		vX := v.X
 		vY := v.Y
 		board.Squares[vX][vY] = &v
 		board.Leaderboard[playerIndex] = &v
+		ctx, err := tag.New(context.Background(), tag.Insert(botId, k))
+		if err != nil {
+			log.Fatal(err)
+		}
+		stats.Record(ctx, score.M(int64(v.Score)))
 		playerIndex++
 	}
 	// now sort the leaderboard

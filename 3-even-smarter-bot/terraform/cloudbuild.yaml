@@ -1,0 +1,54 @@
+#timeout: 1200s
+#logsBucket: $_LOGS_BUCKET_URL
+steps:
+  # tflint --init; tflint --no-color 
+  - name: ghcr.io/terraform-linters/tflint-bundle
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        tflint --init --no-color > tflint.txt; tflint --no-color >> tflint.txt
+    dir: ${_ARTIFACT_DIR}
+  # terraform init -input=false
+  - name: gcr.io/$PROJECT_ID/terraform:${_TERRAFORM_VERSION}
+    args:
+      - init
+      - -input=false
+    dir: ${_ARTIFACT_DIR}
+  # terraform plan -input=false -out=tfplan
+  - name: gcr.io/$PROJECT_ID/terraform:${_TERRAFORM_VERSION}
+    args:
+      - plan
+      - -input=false
+      - -out=tfplan
+    dir: ${_ARTIFACT_DIR}
+  # terraform show -no-color tfplan > tfplan.txt
+  - name: gcr.io/$PROJECT_ID/terraform:${_TERRAFORM_VERSION}
+    entrypoint: 'bash' ## we slip back to bash so we can use stdout redirect to capture the output of the show cmd
+    args:
+      - '-c'
+      - |
+        terraform show -no-color tfplan > tfplan.txt
+    dir: ${_ARTIFACT_DIR}
+  # terraform apply -auto-approve -input=false tfplan
+  - name: gcr.io/$PROJECT_ID/terraform:${_TERRAFORM_VERSION}
+    args:
+      - apply
+      - -auto-approve
+      - -input=false
+      - tfplan
+    dir: ${_ARTIFACT_DIR}
+substitutions:
+  # _LOGS_BUCKET_URL: "gs://logs-bucket"
+  _ARTIFACTS_BUCKET_URL: "gs://artifacts-bucket"
+  _ARTIFACT_PREFIX: "artifact-prefix"
+  _ARTIFACT_DIR: "artifact-dir"
+  _TERRAFORM_VERSION: "latest"
+artifacts:
+  objects:
+    location: ${_ARTIFACTS_BUCKET_URL}/${_ARTIFACT_PREFIX}/$BUILD_ID
+    paths:
+      - resources/cloudbuild/cloudbuild-tf-apply.yaml
+      - ${_ARTIFACT_DIR}/tfplan
+      - ${_ARTIFACT_DIR}/tfplan.txt
+      - ${_ARTIFACT_DIR}/tflint.txt
