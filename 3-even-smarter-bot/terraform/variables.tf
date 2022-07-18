@@ -20,3 +20,8 @@ variable "repository_id" {
   type    = string
   default = "bots-repo"
 }
+
+variable "region" {
+  type    = string
+  default = "us-central1"
+}

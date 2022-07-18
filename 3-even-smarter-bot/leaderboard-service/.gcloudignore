@@ -1,0 +1,10 @@
+.git
+.github
+.theia
+1-dumb-bot
+2-smarter-bot
+3-even-smarter-bot/player-bot
+3-even-smarter-bot/score-monitor-service
+3-even-smarter-bot/terraform
+cloud-run-hackathon-go.code-workspace
+request-example.json

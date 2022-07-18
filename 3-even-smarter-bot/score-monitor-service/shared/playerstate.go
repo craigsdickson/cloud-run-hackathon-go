@@ -1,4 +1,4 @@
-package playerstate
+package shared
 
 type PlayerState struct {
 	X         int    `json:"x"`

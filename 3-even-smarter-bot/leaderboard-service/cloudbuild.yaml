@@ -4,22 +4,22 @@ steps:
   args: [
     'build', 
     '--builder=gcr.io/buildpacks/builder:v1', 
-    '--path', './3-even-smarter-bot/player-bot', 
-    '--publish', 'us-docker.pkg.dev/$PROJECT_ID/bots-repo/player-bot:$COMMIT_SHA'
+    '--path', './3-even-smarter-bot/leaderboard-service', 
+    '--publish', 'us-docker.pkg.dev/$PROJECT_ID/bots-repo/leaderboard-service:$COMMIT_SHA'
   ]
 
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [
     'run',
     'deploy',
-    '--image=us-docker.pkg.dev/$PROJECT_ID/bots-repo/player-bot:$COMMIT_SHA',
+    '--image=us-docker.pkg.dev/$PROJECT_ID/bots-repo/leaderboard-service:$COMMIT_SHA',
     '--platform=managed',
     '--project=$PROJECT_ID',
     '--service-account=cloudrun-bot@microbot-hackathon.iam.gserviceaccount.com',
-    '--set-env-vars=ARENA_UPDATES_PUBSUB_TOPIC_NAME=arena-updates,REDIS_HOST=10.246.115.195,REDIS_PORT=6379',
     '--vpc-connector=vpcconn',
+    '--set-env-vars=REDIS_HOST=10.246.115.195,REDIS_PORT=6379',
     '--region=us-central1',
     '--allow-unauthenticated',
     '--memory=256Mi',
-    'player-bot'
+    'leaderboard-service'
   ]

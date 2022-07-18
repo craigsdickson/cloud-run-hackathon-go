@@ -1,7 +1,7 @@
 package main
 
 import (
-	"even-smarter-bot/playerstate"
+	"player-bot/shared"
 )
 
 type ArenaUpdate struct {
@@ -11,8 +11,8 @@ type ArenaUpdate struct {
 		} `json:"self"`
 	} `json:"_links"`
 	Arena struct {
-		Dimensions []int                              `json:"dims"`
-		State      map[string]playerstate.PlayerState `json:"state"`
+		Dimensions []int                         `json:"dims"`
+		State      map[string]shared.PlayerState `json:"state"`
 	} `json:"arena"`
 }
 
