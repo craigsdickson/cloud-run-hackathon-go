@@ -102,21 +102,27 @@ func play(input ArenaUpdate) (response string) {
 	// check to see if there is a leaderboard available, otherwsie just look for closest player
 	leaderboard := getLeaderboard()
 	if leaderboard != nil {
-		if board.IsThereAHighScoringOpponentInFrontOfMe(myState, MAX_THROW_DISTANCE, leaderboard, HIGH_SCORING_PERCENTILE) {
-			log.Printf("there is a highscoring opponent in front of me, so I am going to throw")
-			return "T"
+		// check if i am the leader and switch to only targeting high scoring players if so
+		if myState == leaderboard[0] {
+			log.Printf(("I am the leader, targeting high scoring players only"))
+			if board.IsThereAHighScoringOpponentInFrontOfMe(myState, MAX_THROW_DISTANCE, leaderboard, HIGH_SCORING_PERCENTILE) {
+				log.Printf("there is a highscoring opponent in front of me, so I am going to throw")
+				return "T"
+			} else {
+				log.Printf("there are no highscoring opponents to throw at")
+				return moveTowardsClosestHighScoringOpponent(myState, board, leaderboard)
+			}
 		} else {
-			log.Printf("there are no highscoring opponents to throw at")
-			return moveTowardsClosestHighScoringOpponent(myState, board, leaderboard)
+			log.Printf(("there is a leaderboard, but I am not the leader"))
 		}
+	}
+	// if we get to here either there was no leaderboard, or we are currently winning, so we switch to targeting all players
+	if board.IsThereAnOpponentInFrontOfMe(myState, MAX_THROW_DISTANCE) {
+		log.Printf("there is an opponent in front of me, so I am throwing")
+		return "T"
 	} else {
-		if board.IsThereAnOpponentInFrontOfMe(myState, MAX_THROW_DISTANCE) {
-			log.Printf("there is an opponent in front of me, so I am throwing")
-			return "T"
-		} else {
-			log.Printf("there are no opponents to throw at")
-			return moveTowardsClosestOpponent(myState, board)
-		}
+		log.Printf("there are no opponents to throw at")
+		return moveTowardsClosestOpponent(myState, board)
 	}
 }
 
